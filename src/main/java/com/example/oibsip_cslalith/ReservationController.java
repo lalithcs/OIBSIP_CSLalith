@@ -2,14 +2,13 @@ package com.example.oibsip_cslalith;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ReservationController {
@@ -24,7 +23,7 @@ public class ReservationController {
     private TextField classField;
 
     @FXML
-    private TextField dateField;
+    private DatePicker dateField;
 
     @FXML
     private TextField sourceField;
@@ -34,41 +33,52 @@ public class ReservationController {
 
     @FXML
     private Button reserveButton;
+    @FXML
+    private Label trainNameLabel;
+
+
     private static final String JDBC_URL = "jdbc:mysql://localhost:3306/OReserveSys";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "lalith1.";
     private Stage primaryStage;
+    private Connection connection;
+
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
+
     @FXML
     private void handleReservation(ActionEvent event) {
+        // Remaining code for handling reservations
         String name = nameField.getText();
         String trainNumber = trainNumberField.getText();
+        showTrainName(event);
         String travelClass = classField.getText();
-        String date = dateField.getText();
+        String date = String.valueOf(dateField.getValue());
         String source = sourceField.getText();
         String destination = destinationField.getText();
+
         boolean isReserved = reserveTicket(name, trainNumber, travelClass, date, source, destination);
 
         if (isReserved) {
             showAlert(Alert.AlertType.INFORMATION, "Reservation Success", null, "Ticket reserved successfully!");
+            String reservationInfo = "Name: " + name + "\nTrain Number: " + trainNumber
+                    + "\nClass: " + travelClass + "\nDate: " + date
+                    + "\nFrom: " + source + "\nTo: " + destination;
+
+            showAlert(Alert.AlertType.INFORMATION, "Reservation Details", null, reservationInfo);
         } else {
             showAlert(Alert.AlertType.ERROR, "Reservation Failed", null, "Failed to reserve the ticket.");
         }
-        // Perform reservation logic (replace with actual reservation process)
-        // For demonstration purposes, show reservation details in an alert
-        String reservationInfo = "Name: " + name + "\nTrain Number: " + trainNumber
-                + "\nClass: " + travelClass + "\nDate: " + date
-                + "\nFrom: " + source + "\nTo: " + destination;
 
-        showAlert(Alert.AlertType.INFORMATION, "Reservation Details", null, reservationInfo);
+
     }
+
     private boolean reserveTicket(String name, String trainNumber, String travelClass, String date,
                                   String source, String destination) {
-        // JDBC connection and insertion logic
+        // Remaining code for ticket reservation
         try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
-            String insertQuery = "INSERT INTO Tickets (Name, TrainNumber, TravelClass, Date, Source, Destination) " +
+            String insertQuery = "INSERT INTO Ticket (Name, train_no,class, doj, Source, Destination) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
@@ -87,12 +97,51 @@ public class ReservationController {
         }
     }
 
-    // Utility method to show an alert
     private void showAlert(Alert.AlertType alertType, String title, String header, String content) {
+        // Remaining code for showing alerts
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void initialize() {
+        try {
+            connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        trainNumberField.textProperty().addListener((observable, oldValue, newValue) -> {
+            String trainName = fetchTrainName(newValue);
+            trainNameLabel.setText(trainName);
+        });
+    }
+
+    private String fetchTrainName(String trainNumber) {
+        String name = "";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT train_number FROM Train WHERE train_no = ?");
+            preparedStatement.setString(1, trainNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                name = resultSet.getString("train_number");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return name;
+    }
+
+    @FXML
+    private void showTrainName(ActionEvent event) {
+        String trainNumber = trainNumberField.getText();
+        String trainName = fetchTrainName(trainNumber);
+        if (!trainName.isEmpty()) {
+            nameField.setText(trainName);
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Train Not Found", null, "Train number not found in the database.");
+        }
     }
 }
