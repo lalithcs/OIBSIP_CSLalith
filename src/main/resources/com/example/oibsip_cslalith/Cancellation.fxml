@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="10" prefHeight="200" prefWidth="300" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.oibsip_cslalith.CancellationController">
+    <children>
+        <Label text="Enter PNR Number" />
+        <TextField fx:id="pnrField" />
+        <Button fx:id="okButton" onAction="#retrieveTicketDetails" text="OK" />
+        <Label fx:id="nameLabel"  layoutX="400.0" layoutY="300"/>
+        <Label fx:id="trainNumberLabel" layoutX="400.0" layoutY="320" />
+        <Label fx:id="dateOfJourneyLabel" layoutX="400.0" layoutY="340"/>
+        <Label fx:id="sourceLabel" layoutX="400.0" layoutY="360" />
+        <Label fx:id="destinationLabel" layoutX="400.0" layoutY="380" />
+
+    </children>
+</VBox>

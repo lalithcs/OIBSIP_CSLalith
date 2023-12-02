@@ -18,6 +18,7 @@
 
 
 
-        <Button layoutX="271.0" layoutY="318.0" text="Submit" onAction="#handleReservation" fx:id="reserveButton" />
+        <Button layoutX="271.0" layoutY="325.0" text="Submit" onAction="#handleReservation" fx:id="reserveButton" />
+        <Button layoutX="271.0" layoutY="350.0" text="Submit" onAction="#handleCancellation" fx:id="cancelButton" />
     </children>
 </AnchorPane>

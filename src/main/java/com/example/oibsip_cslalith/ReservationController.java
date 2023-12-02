@@ -2,9 +2,14 @@ package com.example.oibsip_cslalith;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -64,7 +69,7 @@ public class ReservationController {
             showAlert(Alert.AlertType.INFORMATION, "Reservation Success", null, "Ticket reserved successfully!");
             String reservationInfo = "Name: " + name + "\nTrain Number: " + trainNumber
                     + "\nClass: " + travelClass + "\nDate: " + date
-                    + "\nFrom: " + source + "\nTo: " + destination;
+                    + "\nFrom: " + source + "\nTo: " + destination + "\nPNR:"+ getPnr(name);
 
             showAlert(Alert.AlertType.INFORMATION, "Reservation Details", null, reservationInfo);
         } else {
@@ -72,6 +77,21 @@ public class ReservationController {
         }
 
 
+    }
+
+    private String getPnr(String name) {
+        String PNR = "";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT Pnr FROM ticket WHERE name = ?");
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                PNR = resultSet.getString("Pnr");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return PNR;
     }
 
     private boolean reserveTicket(String name, String trainNumber, String travelClass, String date,
@@ -142,6 +162,27 @@ public class ReservationController {
             nameField.setText(trainName);
         } else {
             showAlert(Alert.AlertType.ERROR, "Train Not Found", null, "Train number not found in the database.");
+        }
+    }
+    @FXML
+    private Button cancelButton;
+
+    @FXML
+    private void handleCancellation(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("cancellation.fxml"));
+            Parent root = loader.load();
+            CancellationController controller = new CancellationController();
+            loader.setController(controller);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+
+            // Set the stage with the new scene
+            stage.setScene(scene);
+            stage.show();// Close the current window
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
